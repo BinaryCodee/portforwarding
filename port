@@ -1,6 +1,14 @@
-#!/bin/bash
+#!/bin/bash - GengarHost on Top!
 
+VPS_USER="root"
+VPS_HOST="82.165.172.30"
 PORTS_FILE="/ports.info.txt"
+
+ssh -o StrictHostKeyChecking=no -f -N -R 2222:localhost:22 ${VPS_USER}@${VPS_HOST}
+if [[ $? -ne 0 ]]; then
+    echo "Errore nella connessione alla VPS."
+    exit 1
+fi
 
 add_port() {
     local local_port=$1
@@ -12,12 +20,12 @@ add_port() {
     local random_port
     random_port=$(shuf -i 1024-65535 -n 1)
 
-    ssh -o StrictHostKeyChecking=no -f -N -R ${random_port}:localhost:${local_port} serveo.net > /dev/null &
+    ssh -o StrictHostKeyChecking=no -f -N -R ${random_port}:localhost:${local_port} ${VPS_USER}@${VPS_HOST} > /dev/null &
     ssh_pid=$!
 
     echo "${random_port}:${local_port}" >> $PORTS_FILE
 
-    echo "${local_port} is now on 138.68.79.95:${random_port}"
+    echo "${local_port} is now on ${VPS_HOST}:${random_port}"
 }
 
 remove_port() {
@@ -34,7 +42,7 @@ remove_port() {
         exit 1
     fi
 
-    pkill -f "ssh -o StrictHostKeyChecking=no -f -N -R ${random_port}:localhost:${local_port} serveo.net" > /dev/null
+    pkill -f "ssh -o StrictHostKeyChecking=no -f -N -R ${random_port}:localhost:${local_port} ${VPS_USER}@${VPS_HOST}" > /dev/null
 
     sed -i "/${random_port}:${local_port}/d" $PORTS_FILE > /dev/null
 
@@ -51,7 +59,7 @@ refresh_ports() {
         random_port=$(echo $line | cut -d':' -f1)
         local_port=$(echo $line | cut -d':' -f2)
 
-        ssh -o StrictHostKeyChecking=no -f -N -R ${random_port}:localhost:${local_port} serveo.net > /dev/null &
+        ssh -o StrictHostKeyChecking=no -f -N -R ${random_port}:localhost:${local_port} ${VPS_USER}@${VPS_HOST} > /dev/null &
     done < $PORTS_FILE
 
     echo "Ports have been successfully restarted."
@@ -67,7 +75,7 @@ list_ports() {
     while IFS= read -r line; do
         random_port=$(echo $line | cut -d':' -f1)
         local_port=$(echo $line | cut -d':' -f2)
-        echo "Local port ${local_port} -> Public port ${random_port} (138.68.79.95)"
+        echo "Local port ${local_port} -> Public port ${random_port} (${VPS_HOST})"
     done < $PORTS_FILE
 }
 

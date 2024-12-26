@@ -1,7 +1,7 @@
 #!/bin/bash - GengarHost on Top!
 
 VPS_USER="root"
-VPS_HOST="82.165.172.30"
+VPS_HOST="yourip"
 PORTS_FILE="/ports.info.txt"
 
 ssh -o StrictHostKeyChecking=no -f -N -R 2222:localhost:22 ${VPS_USER}@${VPS_HOST}
